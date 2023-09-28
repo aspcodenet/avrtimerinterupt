@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/delay.h>
 
 #define BIT_SET(a, b) ((a) |= (1ULL << (b)))
 #define BIT_CLEAR(a,b) ((a) &= ~(1ULL<<(b)))
@@ -10,42 +11,33 @@
 // C (analog input pins)
 // D (digital pins 0 to 7)
 
-#define LED_PIN 2
+#define LED_PIN 6
 
 void checkAndHandleInput(){
     //Kolla o trtckt på knapp eller whatever
 }
 
-ISR(TIMER1_OVF_vect){
-    BIT_FLIP(PORTB,LED_PIN);
-    TCNT1 = 65535-15625;
+volatile double dutyCycle = 95;
+ISR(TIMER0_OVF_vect){
 }
 
 //I dont clear it - CTC
 int main(){
 
-    BIT_SET(DDRB, LED_PIN); //Sätt led_pin till output mode
+    BIT_SET(DDRD, LED_PIN); //Sätt led_pin till output mode
 
-    //Max value of 65535 -> overflow -> ISR
-    TCNT1 = 65535-15625; // Start value every cycle ++
-    //16Mhz / 1024 = 15625 Hz  - ticks per sec
-    TCCR1B = (1 << CS10)| (1 << CS12); // 1024
-
-    //TCCR0A – Timer/Counter Control Register A
-    TCCR0B |=  (1 << CS02)|(1 << CS00); //Prescaler 1024
-    TCCR1A = 0;
-    TIMSK1 = (1 << TOIE1);
-
+    TCCR0A = (1 << COM0A1) | (1 << WGM00) | (1 << WGM01);
+    TIMSK0 = (1 << TOIE0);
+    OCR0A = (dutyCycle/100)*255;
     sei();
 
-    TCNT0 = 0;
-    int overflows = 0;
+    TCCR0B = (1 << CS00);
 
     while(1){
         
         //Check input
         checkAndHandleInput();
- 
+        _delay_ms(100);
     }
 
     return 0;
