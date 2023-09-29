@@ -15,7 +15,17 @@
 
 void checkAndHandleInput(){
     //Kolla o trtckt på knapp eller whatever
+    // om tryckt
+    // dutyCycle += 10;
+    // if(dutyCycle > 100)
+    // dutyCycle = 5;
+
+
 }
+// 1 - PWM frekvsn
+// 25 % av tiden PÅ
+// 75% av tiden AV
+// dutyCycle 25%
 
 volatile double dutyCycle = 95;
 ISR(TIMER0_OVF_vect){
@@ -25,7 +35,7 @@ ISR(TIMER0_OVF_vect){
 int main(){
 
     BIT_SET(DDRD, LED_PIN); //Sätt led_pin till output mode
-
+ 
     TCCR0A = (1 << COM0A1) | (1 << WGM00) | (1 << WGM01);
     TIMSK0 = (1 << TOIE0);
     OCR0A = (dutyCycle/100)*255;
